@@ -156,11 +156,15 @@ var timer = setInterval(function() {
 
                 if (time - lastCalTime > 60) {
                     lastCalTime = time;
+
+                    if (entity2.angle == undefined) {
+                        entity2.angle = 0;
+                    }
                     entity2.angle += 10;
                     entity2.angle %= 360;
                     var angle = (entity2.angle * (Math.PI / 2)) / 90;
 
-                    var tmp = new Circle({r: 5, x: Math.round(entity2.position().x, 2), y: Math.round(entity2.position().y, 2), color: randomColor(), stroke: "black"})
+                    var tmp = new Circle({r: 3, x: Math.round(entity2.position().x, 2), y: Math.round(entity2.position().y, 2), color: randomColor(), stroke: "black"})
 
                     tmp.path = { position: {}, next: null };
                     tmp.path.position.x = (Math.round(entity2.x, 2) + (100 + Math.floor(Math.random() * 100) + entity2.r) * Math.sin(angle)) + agar.x;
@@ -260,7 +264,8 @@ var timer = setInterval(function() {
 
             var value = Math.floor(Math.abs(noise.simplex2(Math.floor(xworld * 1000) / 100, Math.floor(yworld * 1000) / 100)) * 100);
             
-            if (value > 75) {
+            if (value > 75 && value < 95) {
+
                 var tmp = new Circle({
                         r: 10,
                         x: (screenx),// forcement < 25% de width
@@ -268,8 +273,7 @@ var timer = setInterval(function() {
                         color: randomColor(),
                         xworld: xworld,
                         yworld: yworld
-                    }
-                );
+                    });
 
                 tmp.path = { position: {}, next: null };
 
@@ -278,6 +282,21 @@ var timer = setInterval(function() {
                 tmp.path.position.x = (Math.round(tmp.x, 2) + (100 + Math.floor(Math.random() * 100) + tmp.r) * Math.sin(angle)) + agar.x;
                 tmp.path.position.y = (Math.round(tmp.y, 2) + (100 + Math.floor(Math.random() * 100) + tmp.r) * Math.cos(angle)) + agar.y;
                 tmp.maxSpeed = 1;
+
+                world.push(tmp);
+                stars[xworld + "x" + yworld] = tmp;
+            } else if (value >= 95) {
+                var tmp = new Circle({
+                        r: 80,
+                        x: (screenx),// forcement < 25% de width
+                        y: (screeny),// sur toute la hauteur
+                        color: "#669900",
+                        xworld: xworld,
+                        yworld: yworld,
+                        mur: true,
+                        stroke: "#446600",
+                        "stroke-width": 10
+                    });
 
                 world.push(tmp);
                 stars[xworld + "x" + yworld] = tmp;
@@ -298,8 +317,6 @@ var timer = setInterval(function() {
     if (scale < 30) {
         scale = 30;
     }
-
-    console.log(scale);
     
     //scale * 1 / 100 example : 80 * 1 / 100 = 0.8
     var finalScale = scale * 1 / 100;
