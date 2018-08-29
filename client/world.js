@@ -42,10 +42,6 @@ var feMerge = blur.append("feMerge");
 
 var pseudo = "SALUT";
 
-world = [];
-balls = [];
-agar = { x: 0, y: 0, width: 6000, height: 6000 };
-
 /*
 ** add grid 30*30
 */

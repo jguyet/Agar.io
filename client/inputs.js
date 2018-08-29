@@ -9,42 +9,14 @@ Factory.addMethods(Circle, {
     }
 });
 
-var stape1 = { position: { x: 1000, y: 300 }, next: null };
-var stape2 = { position: { x: 500, y: 300 }, next: null };
-stape1.next = stape2;
-stape2.next = stape1;
-
-var ia = new Circle({
-            id: "enemi",
-            r: 80,
-            x: 500,
-            y: 300,
-            color: randomColor(),
-            stroke: "grey",
-            text: "Ennemi",
-            path: stape1,
-            stop: 0,
-            maxSpeed: 3,
-            tag: "entity",
-            collider: true
-        });
-
-var text = new Text({parent: ia, text: "IA"});
-
-ia.childs = [text];
-ia.text = text;
-
-world.push(ia);
-
-var player = new Circle({id: "circle", r: 40, x: width / 2, y: height / 2, color: randomColor(), stroke: "black", collider: true, tag: "player" });
+var currentPlayer = new Circle({id: "circle", r: 40, x: width / 2, y: height / 2, color: randomColor(), stroke: "black", collider: true, tag: "player" });
 //var text = new Text({id: "circleText", parent: player, text: "DEMO", color: "white" });
-var img = new Image({id: "circleImg", parent: player, width: 100, height: 100, "xlink:href": "https://i.imgur.com/FBPuTDh.jpg"});
+//var img = new Image({id: "circleImg", parent: currentPlayer, width: 100, height: 100, "xlink:href": "https://i.imgur.com/FBPuTDh.jpg"});
 
-player.childs = [img];
+//currentPlayer.childs = [img];
 //player.text = text;
 
-balls.push(player);
-world.push(player);
+world.push(currentPlayer);
 
 var stars = {};
 
@@ -66,29 +38,20 @@ d3.select("body").attr('tabindex', '0').attr('focusable', 'true')
 });
 
 var maxSpeed = 8;
-var o = 0;
-var deleted = [];
 var lastCalTime = 0;
 
 var timer = setInterval(function() {
-    deleted = [];
+    var deleted = [];
     var finalPosition = mouse;
-    var master = 0;
 
-    moveWorldTo(balls[0], { x: width / 2, y: height / 2 }, maxSpeed, world, false, agar);
+    //Move World to currentPlayer
+    moveWorldTo(currentPlayer, { x: width / 2, y: height / 2 }, maxSpeed, world, false, agar);
 
-    for (var i = 0; i < balls.length; i++) {
-        var element = balls[i];
-        moveTo(element, finalPosition, maxSpeed, agar);
+    //move currentPlayer
+    moveTo(currentPlayer, finalPosition, maxSpeed, agar);
 
-        if (keys[81] === true) {
-            element.incress(2);
-        }
-
-        if (master == null) {
-            master = element;
-            finalPosition = element.position();
-        }
+    if (keys[81] === true) {
+        currentPlayer.incress(2);
     }
 
 
@@ -104,41 +67,6 @@ var timer = setInterval(function() {
         if (moveTo(element, { x: element.path.position.x - agar.x, y: element.path.position.y - agar.y } , element.maxSpeed, agar) == false) {
             if (element.path.next != undefined && element.path.next != null) {
                 element.path = element.path.next;
-            }
-        }
-    }
-
-    if (keys[32] === true) {
-        keys[32] = false;
-        var l = balls.length;
-        for (var b = 0; b < l; b++) {
-            var circle = balls[b];
-
-            if (circle.r < 100) {
-                continue ;
-            }
-
-            //var textname = circle.text.text;
-            var pos = circle.position();
-            var r = circle.r;
-            var nr = r / 2;
-
-            deleted.push(circle);
-            for (var i = 0; i < 3; i++) {
-                var c = new Circle({ id: "circle", r: nr, x: pos.x + ((Math.random() * 100)% 50), y: pos.y + ((Math.random() * 100)% 50), color: randomColor(), stroke: "black" });
-                c.collider = true;
-                c.speed = 30;
-                c.stop = r;
-                c.tag = "player";
-
-                //var text = new Text({ id: "circleText", parent: c, text: textname, color: "white"});
-                var img = new Image({id: "circleImg", parent: c, width: 100, height: 100, "xlink:href": "https://i.imgur.com/FBPuTDh.jpg"});                
-                
-                c.childs = [img];
-               // c.text = text;
-
-                world.push(c);
-                balls.push(c);
             }
         }
     }
@@ -205,9 +133,6 @@ var timer = setInterval(function() {
         if (world.indexOf(deleted[i]) != -1) {
             world.splice(world.indexOf(deleted[i]), 1);
         }
-        if (balls.indexOf(deleted[i]) != -1) {
-            balls.splice(balls.indexOf(deleted[i]), 1);
-        }
         if (deleted[i].xworld != undefined) {
             stars["time" + deleted[i].xworld + "x" + deleted[i].yworld] = new Date().getTime();
             delete stars[deleted[i].xworld + "x" + deleted[i].yworld];
@@ -255,7 +180,8 @@ var timer = setInterval(function() {
                 continue ;
             }
 
-            if (stars["time" + xworld + "x" + yworld] != undefined && new Date().getTime() < stars["time" + xworld + "x" + yworld] + 6000) {
+            if (stars["time" + xworld + "x" + yworld] != undefined
+                && new Date().getTime() < stars["time" + xworld + "x" + yworld] + 6000) {
                 continue ;
             }
 
@@ -274,14 +200,6 @@ var timer = setInterval(function() {
                         xworld: xworld,
                         yworld: yworld
                     });
-
-                tmp.path = { position: {}, next: null };
-
-                var angle = (Math.floor(Math.random() * 180) % 180);
-
-                tmp.path.position.x = (Math.round(tmp.x, 2) + (100 + Math.floor(Math.random() * 100) + tmp.r) * Math.sin(angle)) + agar.x;
-                tmp.path.position.y = (Math.round(tmp.y, 2) + (100 + Math.floor(Math.random() * 100) + tmp.r) * Math.cos(angle)) + agar.y;
-                tmp.maxSpeed = 1;
 
                 world.push(tmp);
                 stars[xworld + "x" + yworld] = tmp;
@@ -307,9 +225,7 @@ var timer = setInterval(function() {
 
     var ray = 0;
 
-    for (var i = 0; i < balls.length; i++) {
-        ray += balls[i].r;
-    }
+    ray = currentPlayer.r;
 
     //scale by circle R (MIN + (REST - (R * REST / MAX_R))) Example : (40 + (60 - (40 * 60 / 600)))
     var scale = (40 + (60 - (ray * 60 / 600)));
