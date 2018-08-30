@@ -12,6 +12,8 @@ import com.weoohh.agar.Start;
 import com.weoohh.agar.client.message.SocketSender;
 import com.weoohh.agar.entity.Player;
 import com.weoohh.agar.game.world.World;
+import com.weoohh.agar.utils.Formulas;
+import com.weoohh.agar.utils.Utils;
 
 public class Client{
 	
@@ -20,6 +22,7 @@ public class Client{
 	public Player								player;
 	public int									id;
 	
+	public String								pseudo;
 	public int									screenWidth;
 	public int									screenHeight;
 	
@@ -31,7 +34,7 @@ public class Client{
 	{
 		System.out.println("NEW CLIENT");
 		this.session = session;
-		this.player = new Player(World.getnextPlayerId(), 0, 0, 40, this);
+		this.player = new Player(World.getnextPlayerId(), Formulas.getRandomValue(0, 6000), Formulas.getRandomValue(0, 6000), 40, Utils.getRandomHexColor(), this);
 		this.id = this.player.getId();
 		Client.players.put(this.id, this);
 		this.aks = new Aks(this);
@@ -42,6 +45,7 @@ public class Client{
 		
 		screenWidth = json.getInt("width");
 		screenHeight = json.getInt("height");
+		pseudo = json.getString("pseudo");
 		
 		JSONObject message = new JSONObject();//set user informations
 		
@@ -62,7 +66,9 @@ public class Client{
 			.put("id", player.getId())
 			.put("x", this.player.getx())
 			.put("y", this.player.gety())
-			.put("r", this.player.getSize());
+			.put("r", this.player.getSize())
+			.put("color", this.player.getColor())
+			.put("pseudo", this.pseudo);
 		SocketSender.sendMessage(this, message.toString());
 		
 		
@@ -73,7 +79,9 @@ public class Client{
 			.put("id", player.getId())
 			.put("x", this.player.getx())
 			.put("y", this.player.gety())
-			.put("r", this.player.getSize());
+			.put("r", this.player.getSize())
+			.put("color", this.player.getColor())
+			.put("pseudo", this.pseudo);
 		SocketSender.sendMessageToAll(message.toString());
 		this.alive = true;
 	}
@@ -93,7 +101,9 @@ public class Client{
 			.put("id", player.getId())
 			.put("x", this.player.getx())
 			.put("y", this.player.gety())
-			.put("r", this.player.getSize());
+			.put("r", this.player.getSize())
+			.put("color", this.player.getColor())
+			.put("pseudo", this.pseudo);
 		SocketSender.sendMessageToAll(message.toString());
 	}
 	

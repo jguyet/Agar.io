@@ -7,7 +7,7 @@ function InitializeSocket()
 
 		socket.onopen = function()
 		{
-			socket.sendMessage({ messageId: 0, width: width, height: height });
+			socket.sendMessage({ messageId: 0, width: width, height: height, pseudo: pseudo });
 			console.log("Connection OK");
 		};
 
@@ -20,6 +20,18 @@ function InitializeSocket()
 			//console.log("received : ", m);
 			switch (m.messageId)
 			{
+				case 500:
+					document.getElementById("ladder").style.visibility = "visible";
+					for (var i = 1; i < 9; i++) {
+						if (m.ranking[i - 1] != undefined) {
+							document.getElementById("rank" + i).innerHTML = '<font style="font-size:15px;">' + m.ranking[i - 1].name.substr(0,12) + '</font>';
+							document.getElementById("score" + i).innerHTML = '<font style="font-size:15px;">' + m.ranking[i - 1].score + '</font>';
+						} else {
+							document.getElementById("rank" + i).innerHTML = "";
+							document.getElementById("score" + i).innerHTML = "";
+						}
+					}
+				break ;
 				case 998://user informations
 					currentId = m.id;
 					agar.width = m.width;
@@ -44,11 +56,14 @@ function InitializeSocket()
 						r: m.r,
 						x: x,
 						y: y,
-						color: randomColor(),
+						color: m.color,
 						stroke: "black",
 						collider: true,
-						tag: "player"
+						tag: "player",
 					});
+					player.childs = [
+						new Text({id: "circleText", parent: player, text: m.pseudo, color: "white" })
+					];
 					players[m.id + ""] = player;
 					currentPlayer = player;
 					world.push(player);
@@ -69,11 +84,14 @@ function InitializeSocket()
 						r: m.r,
 						x: x,
 						y: y,
-						color: randomColor(),
+						color: m.color,
 						stroke: "black",
 						collider: true,
 						tag: "player"
 					});
+					entity.childs = [
+						new Text({id: "circleText", parent: entity, text: m.pseudo, color: "white" })
+					];
 					players[m.id + ""] = entity;
 					world.push(entity);
 				break ;
@@ -94,11 +112,14 @@ function InitializeSocket()
 							r: m.r,
 							x: x,
 							y: y,
-							color: randomColor(),
+							color: m.color,
 							stroke: "black",
 							collider: true,
 							tag: "player"
 						});
+						entity.childs = [
+							new Text({id: "circleText", parent: entity, text: m.pseudo, color: "white" })
+						];
 						players[m.id + ""] = entity;
 						world.push(entity);
 					}
@@ -149,5 +170,3 @@ function InitializeSocket()
 		setTimeout(InitializeSocket, 1000);
 	}
 }
-
-InitializeSocket();

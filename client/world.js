@@ -39,5 +39,3 @@ var feMerge = blur.append("feMerge");
         .attr("in","coloredBlur");
     feMerge.append("feMergeNode")
         .attr("in","SourceGraphic");
-
-var pseudo = "SALUT";

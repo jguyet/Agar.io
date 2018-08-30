@@ -32,10 +32,20 @@
 
             tt.attr("font-family", this.get("font-family"));
             tt.text(this.text);
-            tt.attr("font-size", 10);
+            tt.attr("font-size", 25);
+
+            var mult = 0.5;
+
+            var l = this.text.length;
+
+            while (l > 0) {
+                l -= 2;
+                mult++;
+            }
+
             tt.attr("font-size", function(d) {
                 var diameter, labelAvailableWidth, labelWidth;
-                diameter = 2 * r;
+                diameter = r * mult;
                 this.padding = diameter * 0.10;
                 labelAvailableWidth = diameter - this.padding;
                 bbox = this.getBBox();
@@ -48,7 +58,7 @@
                 tt.attr("font-size", size);//set new font size for change bbox
                 //set to parent x and y points
                 parent.set("x", (Number(x) - (this.getBBox().width / 2.0)));
-                parent.set("y", (Number(y) + ((this.getBBox().height / 3.0))));
+                parent.set("y", (Number(y) + ((this.getBBox().height / 4.0))));
                 tt.remove();
                 return 0;
             });

@@ -4,16 +4,70 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        
     .active {
         stroke: #000;
         stroke-width: 2px;
     }
     
-    .form {
+    .ladder {
         position: absolute;
+        margin-top: 20px;
+        margin-left: calc(100% - 220px);
+        width: 200px;
+        height: 250px;
+        background-color: #989898;
+        border-radius: 15px;
+        opacity: 0.9;
+        visibility: hidden;
+    }
+
+    .table-ladder {
+        font-family: sans-serif;
+        font-size: 20px;
+        list-style-type: none;
+        color: white;
+    }
+
+    .lbl-list-style {
+        min-width: 20px;
+        display: inline;
+        margin-left: -30px;
+        margin-right: 15px;
+    }
+
+    .name-player-ladder {
+    }
+
+    .score-player-ladder {
+    }
+
+
+    .form {
+        width: 100%;
+        height: 100%;
+        /* width: 300px; */
+        /* height: 200px; */
+        background-color: gray;
+        position: absolute;
+        /* margin-top: calc(50% - 100px); */
+        /* margin-left: calc(50% - 150px); */
+        display: block;
+        text-align: center;
+        opacity: 0.7;
+    }
+
+    .form-input {
         margin-top: 50%;
-        margin-left: 50%;
+        font: 400 23px system-ui;
+        border-radius: 10px;
+    }
+
+    .form-button {
+        margin-top: 20px;
+        border-width: 3px;
+        padding: 5px 50px 5px;
+        font: 400 15px system-ui;
+        border-radius: 20px;
     }
     
     </style>
@@ -23,6 +77,63 @@
     <script src="lib/Factory.js"></script>
 </head>
 <body style="margin: 0px">
+    <div id="ladder" class="ladder" >
+        <table class="table-ladder">
+            <tr style="text-align:center;margin-left:-40px;">
+                <th></th>
+                <th style="width: 100%">Ladder</th>
+                <th></th>
+            </tr>
+            <tr>
+                <td style="margin-left: -4px;">
+                    <img src="./img/chess.png" width="20" height="20"/>
+                </td>
+                <td><b class="name-player-ladder" id="rank1" ></b></td>
+                <td><b class="score-player-ladder" id="score1" ></b></td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><b class="name-player-ladder" id="rank2" ></b></td>
+                <td><b class="score-player-ladder" id="score2" ></b></td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><b class="name-player-ladder" id="rank3" ></b></td>
+                <td><b class="score-player-ladder" id="score3" ></b></td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><b class="name-player-ladder" id="rank4" ></b></td>
+                <td><b class="score-player-ladder" id="score4" ></b></td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><b class="name-player-ladder" id="rank5" ></b></td>
+                <td><b class="score-player-ladder" id="score5" ></b></td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><b class="name-player-ladder" id="rank6" ></b></td>
+                <td><b class="score-player-ladder" id="score6" ></b></td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td><b class="name-player-ladder" id="rank7" ></b></td>
+                <td><b class="score-player-ladder" id="score7" ></b></td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td><b class="name-player-ladder" id="rank8" ></b></td>
+                <td><b class="score-player-ladder" id="score8" ></b></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="form" class="form">
+        <input id="pseudo" class="form-input" type="text" value="" placeholder="pseudo ..." /></br>
+        <button class="form-button" onclick="selectPseudo();" >Play</button>
+    </div>
+
 </body>
 <script>
 var world = [];
@@ -31,6 +142,53 @@ var socket;
 var agar = { x: 0, y: 0, width: 6000, height: 6000 };
 var currentPlayer;
 var currentId;
+var pseudo;
+
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+
+    console.log(ca);
+
+    for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
+
+function selectPseudo() {
+    var value = document.getElementById("pseudo").value;
+
+    if (value == "") {
+        return ;
+    }
+
+    setCookie("pseudo", value, 365);
+
+    document.getElementById("form").style.visibility = "hidden";
+
+    pseudo = value;
+    InitializeSocket();
+}
+
+if (getCookie("pseudo") != undefined) {
+    document.getElementById("pseudo").value = getCookie("pseudo");
+}
+
 </script>
 <script src="utils.js"></script>
 <script src="world.js"></script>

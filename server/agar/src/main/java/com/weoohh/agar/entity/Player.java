@@ -8,14 +8,16 @@ public class Player {
 	private double x;
 	private double y;
 	private double size;
+	private String color;
 	private Client client;
 
-	public Player(int id, double x, double y, double size, Client client)
+	public Player(int id, double x, double y, double size, String color, Client client)
 	{
 		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.size = size;
+		this.color = color;
 		this.client = client;
 	}
 	
@@ -54,6 +56,14 @@ public class Player {
 
 	public void setSize(double size) {
 		this.size = size;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
 	}
 	
 }

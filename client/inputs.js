@@ -84,7 +84,7 @@ d3.select("body").attr('tabindex', '0').attr('focusable', 'true')
     console.log("KEY U ", d3.event.keyCode, keys[d3.event.keyCode]);
 });
 
-var maxSpeed = 8;
+var maxSpeed = 10;
 var lastCalTime = 0;
 var stars = {};
 
