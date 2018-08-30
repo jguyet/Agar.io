@@ -51,9 +51,20 @@ function addGrid(gridWidth, gridHeight, size, large) {
 
 Factory.addMethods(Circle, {
     incress: function(i) {
-        this.set("r", this.r + i);
-        if (this.text != undefined) {
-            this.text.update();
+
+        if (this.r + i > 550) {
+            this.set("r", 550);
+        } else {
+            this.set("r", this.r + i);
+        }
+    },
+    decress: function(i) {
+        if (this.r - i < 20) {
+            this.set("r", 20);
+            return false;
+        } else {
+            this.set("r", this.r - i);
+            return true;
         }
     }
 });
@@ -84,7 +95,7 @@ d3.select("body").attr('tabindex', '0').attr('focusable', 'true')
     console.log("KEY U ", d3.event.keyCode, keys[d3.event.keyCode]);
 });
 
-var maxSpeed = 10;
+var maxSpeed = 13;
 var lastCalTime = 0;
 var stars = {};
 
@@ -94,26 +105,33 @@ noise.seed(0);
 
 function gameLoop() {
 
-    if (currentPlayer == undefined || currentPlayer == null) {
-        return ;
-    }
-
     var deleted = [];
     var finalPosition = mouse;
+    var boost = 0;
 
-    //Move World to currentPlayer
-    moveWorldTo(currentPlayer, { x: width / 2, y: height / 2 }, maxSpeed, world, false, agar);
+    // if (keys[32] && currentPlayer.decress(currentPlayer.r*0.5/50)) {
+    //     boost = 5;
+    // }
 
-    //move currentPlayer
-    moveTo(currentPlayer, finalPosition, maxSpeed, agar)
+    // if (keys[65]) {
+    //     currentPlayer.incress(5);
+    // }
 
-    socket.sendMessage({
-        messageId: 2,
-        id: currentId,
-        x: Number(Number((agar.x + currentPlayer.x) + (agar.width / 2)).toFixed(2)),
-        y: Number(Number((agar.y + currentPlayer.y) + (agar.height / 2)).toFixed(2)),
-        r: currentPlayer.r
-    });
+    if (currentPlayer != undefined && currentPlayer != null) {
+        //Move World to currentPlayer
+        moveWorldTo(currentPlayer, { x: width / 2, y: height / 2 }, maxSpeed + boost, world, false, agar);
+    
+        //move currentPlayer
+        moveTo(currentPlayer, finalPosition, maxSpeed + boost, agar)
+    
+        socket.sendMessage({
+            messageId: 2,
+            id: currentId,
+            x: Number(Number((agar.x + currentPlayer.x) + (agar.width / 2)).toFixed(2)),
+            y: Number(Number((agar.y + currentPlayer.y) + (agar.height / 2)).toFixed(2)),
+            r: currentPlayer.r
+        });
+    }
 
     for (var i = 0; i < world.length; i++) {
         var element = world[i];
@@ -171,8 +189,11 @@ function gameLoop() {
                 if (players[entity2.uid + ""] != undefined) {
                     socket.sendMessage({messageId: 3, id: entity2.uid });
                 }
+                var ratio = ((100 * entity2.r) / entity1.r) * 0.01;//in 100%
 
-                entity1.incress(entity2.r * 0.20);
+                ratio = ratio / 4;
+
+                entity1.incress(entity2.r * ratio);
                 deleted.push(entity2);
             }
         } else {
@@ -204,7 +225,7 @@ function entityLoop() {
 
     var savex = agar.x;
     var savey = agar.y;
-    var large = 21;
+    var large = 41;
 
     for (var y = -(height * 0.25); y < (height + (height * 0.25)); y += 100) {
         for (var x = -(width * 0.25); x < (width + (width * 0.25)); x += 100) {
@@ -240,7 +261,7 @@ function entityLoop() {
             if (value > 75 && value < 95) {
 
                 var tmp = new Circle({
-                        r: 10,
+                        r: 20,
                         x: (screenx),// forcement < 25% de width
                         y: (screeny),// sur toute la hauteur
                         color: randomColor(),
@@ -291,10 +312,38 @@ function entityLoop() {
 
 }
 
+var gameloopTime = null;
+var entityLoopTime = null;
 
 function startGame() {
     console.log("START");
 
     setInterval(gameLoop, 1000 / 60);
     setInterval(entityLoop, 50);
+}
+
+function stopGame() {
+
+    if (gameloopTime != undefined) {
+        clearInterval(gameloopTime);
+        gameloopTime = null;
+    }
+    if (entityLoopTime != undefined) {
+        clearInterval(entityLoopTime);
+        entityLoopTime = null;
+    }
+
+    for (var i = 0; i < world.length; i++) {
+        if (world[i].uid != undefined && players["" + world[i].uid] != undefined) {
+            delete players["" + world[i].uid];
+        }
+        if (world[i].xworld != undefined) {
+            stars["time" + world[i].xworld + "x" + world[i].yworld] = new Date().getTime();
+            delete stars[world[i].xworld + "x" + world[i].yworld];
+        }
+        world[i].destroy();
+    }
+    world = [];
+    players = {};
+    stars = {};
 }

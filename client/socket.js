@@ -7,7 +7,7 @@ function InitializeSocket()
 
 		socket.onopen = function()
 		{
-			socket.sendMessage({ messageId: 0, width: width, height: height, pseudo: pseudo });
+			socket.sendMessage({ messageId: 1, width: width, height: height });
 			console.log("Connection OK");
 		};
 
@@ -24,7 +24,7 @@ function InitializeSocket()
 					document.getElementById("ladder").style.visibility = "visible";
 					for (var i = 1; i < 9; i++) {
 						if (m.ranking[i - 1] != undefined) {
-							document.getElementById("rank" + i).innerHTML = '<font style="font-size:15px;">' + m.ranking[i - 1].name.substr(0,12) + '</font>';
+							document.getElementById("rank" + i).innerHTML = '<font style="font-size:15px;">' + charCodeToUtf(m.ranking[i - 1].name).substr(0,12) + '</font>';
 							document.getElementById("score" + i).innerHTML = '<font style="font-size:15px;">' + m.ranking[i - 1].score + '</font>';
 						} else {
 							document.getElementById("rank" + i).innerHTML = "";
@@ -33,6 +33,20 @@ function InitializeSocket()
 					}
 				break ;
 				case 998://user informations
+					stopGame();
+					currentId = m.id;
+					agar.width = m.width;
+					agar.height = m.height;
+					agar.x = 0;
+					agar.y = 0;
+					var x = m.x - (agar.width / 2);
+					var y = m.y - (agar.height / 2);
+					addGrid(agar.width, agar.height, 50, 1);
+					setWorldPos({x: 0, y: 0 }, {x: x, y: y}, world);
+					startGame();
+				break ;
+				case 999://user informations
+					stopGame();
 					currentId = m.id;
 					agar.width = m.width;
 					agar.height = m.height;
@@ -61,8 +75,10 @@ function InitializeSocket()
 						collider: true,
 						tag: "player",
 					});
+
 					player.childs = [
-						new Text({id: "circleText", parent: player, text: m.pseudo, color: "white" })
+						new Text({id: "circleText", parent: player, text: charCodeToUtf(m.pseudo), color: "white" }),
+						new Image({id: "circleImg", parent: player, width: 100, height: 100, "xlink:href": m.img})
 					];
 					players[m.id + ""] = player;
 					currentPlayer = player;
@@ -78,6 +94,10 @@ function InitializeSocket()
 					var x = (worldx + (agar.width / 2)) - (agar.x + (agar.width / 2));
 					var y = (worldy + (agar.height / 2)) - (agar.y + (agar.height / 2));
 
+					if (x < -(width * 0.25) || x > (width + (width * 0.25)) || y < -(height * 0.25) || y > (width + (width * 0.25))) {
+						break ;
+					}
+
 					var entity = new Circle({
 						id: "circle",
 						uid: m.id,
@@ -89,8 +109,10 @@ function InitializeSocket()
 						collider: true,
 						tag: "player"
 					});
+					console.log(m.img);
 					entity.childs = [
-						new Text({id: "circleText", parent: entity, text: m.pseudo, color: "white" })
+						new Text({id: "circleText", parent: entity, text: charCodeToUtf(m.pseudo), color: "white" }),
+						new Image({id: "circleImg", parent: entity, width: 100, height: 100, "xlink:href": m.img})
 					];
 					players[m.id + ""] = entity;
 					world.push(entity);
@@ -100,11 +122,16 @@ function InitializeSocket()
 						break ;
 					}
 
+					var worldx = (m.x - (agar.width / 2));
+					var worldy = (m.y - (agar.height / 2));
+					var x = (worldx + (agar.width / 2)) - (agar.x + (agar.width / 2));
+					var y = (worldy + (agar.height / 2)) - (agar.y + (agar.height / 2));
+
+					if (x < -(width * 0.25) || x > (width + (width * 0.25)) || y < -(height * 0.25) || y > (width + (width * 0.25))) {
+						break ;
+					}
+
 					if (players[m.id + ""] == undefined) {
-						var worldx = (m.x - (agar.width / 2));
-						var worldy = (m.y - (agar.height / 2));
-						var x = (worldx + (agar.width / 2)) - (agar.x + (agar.width / 2));
-						var y = (worldy + (agar.height / 2)) - (agar.y + (agar.height / 2));
 	
 						var entity = new Circle({
 							id: "circle",
@@ -118,16 +145,13 @@ function InitializeSocket()
 							tag: "player"
 						});
 						entity.childs = [
-							new Text({id: "circleText", parent: entity, text: m.pseudo, color: "white" })
+							new Text({id: "circleText", parent: entity, text: charCodeToUtf(m.pseudo), color: "white" }),
+							new Image({id: "circleImg", parent: entity, width: 100, height: 100, "xlink:href": m.img})
 						];
 						players[m.id + ""] = entity;
 						world.push(entity);
+						break ;
 					}
-
-					var worldx = (m.x - (agar.width / 2));
-					var worldy = (m.y - (agar.height / 2));
-					var x = (worldx + (agar.width / 2)) - (agar.x + (agar.width / 2));
-					var y = (worldy + (agar.height / 2)) - (agar.y + (agar.height / 2));
 
 					players[m.id + ""].set("x", x);
 					players[m.id + ""].set("y", y);
@@ -170,3 +194,5 @@ function InitializeSocket()
 		setTimeout(InitializeSocket, 1000);
 	}
 }
+
+InitializeSocket();

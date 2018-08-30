@@ -16,6 +16,9 @@ public class DataProcessor {
 			case 0://ready
 				client.connect(message);
 			break ;
+			case 1://preload
+				client.preload(message);
+			break ;
 			case 2://update
 				client.update(message);
 			break ;

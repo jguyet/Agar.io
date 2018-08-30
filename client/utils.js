@@ -176,4 +176,25 @@ function randomString() {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
   
     return text;
-  }
+}
+
+function utftoCharCode(s) {
+    var tmp = "";
+    
+    for (var i = 0; i < s.length; i++) {
+        if (tmp != "") {
+            tmp += ",";
+        }
+        tmp += s.charCodeAt(i);
+    }
+    return tmp;
+}
+
+function charCodeToUtf(s) {
+    var tmp = "";
+    var split = s.split(",");
+    for (var i = 0; i < split.length; i++) {
+        tmp += String.fromCharCode(split[i]);
+    }
+    return tmp;
+}

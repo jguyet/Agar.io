@@ -53,12 +53,18 @@
         /* margin-left: calc(50% - 150px); */
         display: block;
         text-align: center;
-        opacity: 0.7;
+        opacity: 0.3;
     }
 
     .form-input {
         margin-top: 50%;
         font: 400 23px system-ui;
+        border-radius: 10px;
+    }
+
+    .form-img {
+        margin-top: 20px;
+        font: 400 15px system-ui;
         border-radius: 10px;
     }
 
@@ -130,8 +136,10 @@
     </div>
 
     <div id="form" class="form">
-        <input id="pseudo" class="form-input" type="text" value="" placeholder="pseudo ..." /></br>
-        <button class="form-button" onclick="selectPseudo();" >Play</button>
+        <input id="pseudo" class="form-input" type="text" value="" onkeypress="if (event.keyCode==13){ selectPseudo(); }" placeholder="pseudo ..." />
+        </br>
+        <input id="image" class="form-img" type="text" value="" onkeypress="if (event.keyCode==13){ selectPseudo(); }" placeholder="optionel image url ..." /></br>
+        <button class="form-button" onclick="selectPseudo();" onkeypress="if (event.keyCode==13){ selectPseudo(); }" >Play</button>
     </div>
 
 </body>
@@ -143,6 +151,20 @@ var agar = { x: 0, y: 0, width: 6000, height: 6000 };
 var currentPlayer;
 var currentId;
 var pseudo;
+var urlimg = "";
+
+</script>
+<script src="utils.js"></script>
+<script src="world.js"></script>
+<script src="shape/Shape.js"></script>
+<script src="shape/Circle.js"></script>
+<script src="shape/Text.js"></script>
+<script src="shape/Image.js"></script>
+<script src="inputs.js"></script>
+<script src="collider.js"></script>
+<script src="socket.js"></script>
+
+<script>
 
 function setCookie(cname, cvalue, exdays) {
     var d = new Date();
@@ -181,22 +203,23 @@ function selectPseudo() {
 
     document.getElementById("form").style.visibility = "hidden";
 
+    var imglink = document.getElementById("image").value;
+
+    if (imglink != "") {
+        urlimg = imglink;
+        setCookie("image", imglink, 365);
+    }
+
     pseudo = value;
-    InitializeSocket();
+    socket.sendMessage({ messageId: 0, width: width, height: height, pseudo: utftoCharCode(pseudo), img: urlimg });
 }
 
 if (getCookie("pseudo") != undefined) {
     document.getElementById("pseudo").value = getCookie("pseudo");
 }
 
+if (getCookie("image") != undefined) {
+    document.getElementById("image").value = getCookie("image");
+}
 </script>
-<script src="utils.js"></script>
-<script src="world.js"></script>
-<script src="shape/Shape.js"></script>
-<script src="shape/Circle.js"></script>
-<script src="shape/Text.js"></script>
-<script src="shape/Image.js"></script>
-<script src="inputs.js"></script>
-<script src="collider.js"></script>
-<script src="socket.js"></script>
 </html>

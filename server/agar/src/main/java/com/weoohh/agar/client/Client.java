@@ -23,6 +23,7 @@ public class Client{
 	public int									id;
 	
 	public String								pseudo;
+	public String								imgUrl;
 	public int									screenWidth;
 	public int									screenHeight;
 	
@@ -41,11 +42,28 @@ public class Client{
 		this.alive = false;
 	}
 	
+	public void preload(JSONObject json) {
+		screenWidth = json.getInt("width");
+		screenHeight = json.getInt("height");
+	
+		JSONObject message = new JSONObject();//set user informations
+		
+		message
+			.put("messageId", 999)
+			.put("id", player.getId())
+			.put("x", this.player.getx() - (this.screenWidth / 2))
+			.put("y", this.player.gety() - (this.screenHeight / 2))
+			.put("width", 6000)
+			.put("height", 6000);
+		SocketSender.sendMessage(this, message.toString());
+	}
+	
 	public void connect(JSONObject json) {
 		
 		screenWidth = json.getInt("width");
 		screenHeight = json.getInt("height");
 		pseudo = json.getString("pseudo");
+		imgUrl = json.getString("img");
 		
 		JSONObject message = new JSONObject();//set user informations
 		
@@ -68,6 +86,7 @@ public class Client{
 			.put("y", this.player.gety())
 			.put("r", this.player.getSize())
 			.put("color", this.player.getColor())
+			.put("img", this.imgUrl)
 			.put("pseudo", this.pseudo);
 		SocketSender.sendMessage(this, message.toString());
 		
@@ -81,6 +100,7 @@ public class Client{
 			.put("y", this.player.gety())
 			.put("r", this.player.getSize())
 			.put("color", this.player.getColor())
+			.put("img", this.imgUrl)
 			.put("pseudo", this.pseudo);
 		SocketSender.sendMessageToAll(message.toString());
 		this.alive = true;
@@ -103,6 +123,7 @@ public class Client{
 			.put("y", this.player.gety())
 			.put("r", this.player.getSize())
 			.put("color", this.player.getColor())
+			.put("img", this.imgUrl)
 			.put("pseudo", this.pseudo);
 		SocketSender.sendMessageToAll(message.toString());
 	}
