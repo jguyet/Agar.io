@@ -1,4 +1,4 @@
-![](./images/d3.png | 50x34)
+<img src="./images/d3.png" width="50">
 # Agar.io
 Recoding Agar.io in javascript with d3.js full html5
 
