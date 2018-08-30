@@ -146,6 +146,27 @@ function moveWorldTo(element, finalPosition, maxSpeed, world, reverse, map) {
     return true;
 }
 
+function setWorldPos(pos, finalPosition, world) {
+    var mov = { x: 0, y: 0 };
+    var stop = 0;
+
+    mov.y += (pos.y - finalPosition.y);
+    mov.x += (pos.x - finalPosition.x);
+
+    for (var i = 0; i < world.length; i++) {
+        var e  = world[i];
+        e.translate(mov.x, mov.y);
+    }
+
+    agar.x = Number(Number(agar.x - mov.x).toFixed(2));
+    agar.y = Number(Number(agar.y - mov.y).toFixed(2));
+
+    if (mov.x == 0 && mov.y == 0) {
+        return false;
+    }
+    return true;
+}
+
 
 function randomString() {
     var text = "";

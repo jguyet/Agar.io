@@ -1,4 +1,53 @@
 
+/*
+** add grid 30*30
+*/
+function addGrid(gridWidth, gridHeight, size, large) {
+    
+    for (var x = -(gridWidth / 2); x < (gridWidth / 2); x += size)
+    {
+        var line = SVG.append("rect")
+        .style("fill", "grey")
+        .style("opacity", 0.3)
+        .attr("x", x)
+        .attr("y", -(gridHeight / 2))
+        .attr("width", large)
+        .attr("height", gridWidth);
+
+        line.translate = function(x, y) {
+            this.attr("x", Number(this.attr("x")) + x);
+            this.attr("y", Number(this.attr("y")) + y);
+        }
+
+        line.set = function(attr, value) {
+            this.attr(attr, value);
+        }
+
+        world.push(line);
+    }
+    for (var y = -(gridHeight / 2); y < (gridHeight / 2); y += size)
+    {
+        var line = SVG.append("rect")
+        .style("fill", "grey")
+        .style("opacity", 0.3)
+        .attr("x", -(gridWidth / 2))
+        .attr("y", y)
+        .attr("width", gridHeight)
+        .attr("height", large);
+
+        line.translate = function(x, y) {
+            this.attr("x", Number(this.attr("x")) + x);
+            this.attr("y", Number(this.attr("y")) + y);
+        }
+
+        line.set = function(attr, value) {
+            this.attr(attr, value);
+        }
+
+        world.push(line);
+    }
+}
+
 
 Factory.addMethods(Circle, {
     incress: function(i) {
@@ -9,16 +58,14 @@ Factory.addMethods(Circle, {
     }
 });
 
-var currentPlayer = new Circle({id: "circle", r: 40, x: width / 2, y: height / 2, color: randomColor(), stroke: "black", collider: true, tag: "player" });
+//var currentPlayer = new Circle({id: "circle", r: 40, x: width / 2, y: height / 2, color: randomColor(), stroke: "black", collider: true, tag: "player" });
 //var text = new Text({id: "circleText", parent: player, text: "DEMO", color: "white" });
 //var img = new Image({id: "circleImg", parent: currentPlayer, width: 100, height: 100, "xlink:href": "https://i.imgur.com/FBPuTDh.jpg"});
 
 //currentPlayer.childs = [img];
 //player.text = text;
 
-world.push(currentPlayer);
-
-var stars = {};
+//world.push(currentPlayer);
 
 
 var keys = {};
@@ -39,8 +86,18 @@ d3.select("body").attr('tabindex', '0').attr('focusable', 'true')
 
 var maxSpeed = 8;
 var lastCalTime = 0;
+var stars = {};
 
-var timer = setInterval(function() {
+noise.seed(0);
+
+////////////////////////////////////////////////////////////////////////
+
+function gameLoop() {
+
+    if (currentPlayer == undefined || currentPlayer == null) {
+        return ;
+    }
+
     var deleted = [];
     var finalPosition = mouse;
 
@@ -48,12 +105,15 @@ var timer = setInterval(function() {
     moveWorldTo(currentPlayer, { x: width / 2, y: height / 2 }, maxSpeed, world, false, agar);
 
     //move currentPlayer
-    moveTo(currentPlayer, finalPosition, maxSpeed, agar);
+    moveTo(currentPlayer, finalPosition, maxSpeed, agar)
 
-    if (keys[81] === true) {
-        currentPlayer.incress(2);
-    }
-
+    socket.sendMessage({
+        messageId: 2,
+        id: currentId,
+        x: Number(Number((agar.x + currentPlayer.x) + (agar.width / 2)).toFixed(2)),
+        y: Number(Number((agar.y + currentPlayer.y) + (agar.height / 2)).toFixed(2)),
+        r: currentPlayer.r
+    });
 
     for (var i = 0; i < world.length; i++) {
         var element = world[i];
@@ -105,21 +165,13 @@ var timer = setInterval(function() {
             return ;
         }
 
-        if (entity1.tag == "player" && entity2.tag == "player") {
-            if (entity2.stop <= 0 && entity1.stop <= 0) {
-                entity2.stop = 5;
-                entity1.incress(entity2.r * 0.5);
-                deleted.push(entity2);
-            } else {
-                var x = entity1.position().x - entity2.position().x;
-                var y = entity1.position().y - entity2.position().y;
-                entity1.translate(x / 10, y / 10);
-            }
-            return ;
-        }
-
         if (entity1.tag == "player" || entity1.tag == "entity") {
             if (collide.distance < (entity1.r - entity2.r)) {
+
+                if (players[entity2.uid + ""] != undefined) {
+                    socket.sendMessage({messageId: 3, id: entity2.uid });
+                }
+
                 entity1.incress(entity2.r * 0.20);
                 deleted.push(entity2);
             }
@@ -133,6 +185,9 @@ var timer = setInterval(function() {
         if (world.indexOf(deleted[i]) != -1) {
             world.splice(world.indexOf(deleted[i]), 1);
         }
+        if (deleted[i].uid != undefined && players["" + deleted[i].uid] != undefined) {
+            delete players["" + deleted[i].uid];
+        }
         if (deleted[i].xworld != undefined) {
             stars["time" + deleted[i].xworld + "x" + deleted[i].yworld] = new Date().getTime();
             delete stars[deleted[i].xworld + "x" + deleted[i].yworld];
@@ -143,17 +198,9 @@ var timer = setInterval(function() {
     SVG.select("#circle").moveToFront();
     SVG.select("#circleImg").moveToFront();
     SVG.select("#circleText").moveToFront();
+}
 
-}, 1000 / 60);
-
-noise.seed(0);
-
-var scale = 100;
-
-var timer = setInterval(function() {
-
-    if (world.length > 400)
-        return ;
+function entityLoop() {
 
     var savex = agar.x;
     var savey = agar.y;
@@ -223,6 +270,10 @@ var timer = setInterval(function() {
     }
     //console.log("WORLD ELEMENTS :", world.length);
 
+    if (currentPlayer == undefined || currentPlayer == null) {
+        return ;
+    }
+
     var ray = 0;
 
     ray = currentPlayer.r;
@@ -238,4 +289,12 @@ var timer = setInterval(function() {
     var finalScale = scale * 1 / 100;
     SVG.attr("transform", "translate(" + ((width * (1 - finalScale)) / 2) + "," + ((height * (1 - finalScale)) / 2) + ") scale(" + finalScale + ", " + finalScale + ")");
 
-}, 100);
+}
+
+
+function startGame() {
+    console.log("START");
+
+    setInterval(gameLoop, 1000 / 60);
+    setInterval(entityLoop, 50);
+}

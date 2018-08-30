@@ -1,0 +1,49 @@
+package org.web.entity;
+
+import com.weoohh.agar.client.Client;
+
+public class Player {
+	
+	private int id;
+	private double x;
+	private double y;
+	private Client client;
+
+	public Player(int id, double x, double y, Client client)
+	{
+		this.id = id;
+		this.x = x;
+		this.y = y;
+		this.client = client;
+	}
+	
+	public int getId()
+	{
+		return (id);
+	}
+	
+	public double getx()
+	{
+		return (x);
+	}
+	
+	public void setx(double d)
+	{
+		this.x = d;
+	}
+	
+	public double gety()
+	{
+		return (y);
+	}
+	
+	public void sety(double y)
+	{
+		this.y = y;
+	}
+	
+	public Client getClient() {
+		return client;
+	}
+	
+}

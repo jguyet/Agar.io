@@ -1,0 +1,15 @@
+package org.web.client.receivedmessage;
+
+import org.web.client.Client;
+
+import com.weoohh.agar.Console;
+import com.weoohh.agar.Console.Color;
+
+public class DataProcessor {
+
+	public void postProcess(String message, Client client)
+	{
+		Console.println("[NEW MESSAGE] message [" + message + "]", Color.EXCHANGE);
+		
+	}
+}

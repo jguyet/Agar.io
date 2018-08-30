@@ -1,0 +1,14 @@
+package org.web.client.receivedmessage;
+
+import org.web.Console;
+import org.web.Console.Color;
+import org.web.client.Client;
+
+public class DataProcessor {
+
+	public void postProcess(String message, Client client)
+	{
+		Console.println("[NEW MESSAGE] message [" + message + "]", Color.EXCHANGE);
+		
+	}
+}

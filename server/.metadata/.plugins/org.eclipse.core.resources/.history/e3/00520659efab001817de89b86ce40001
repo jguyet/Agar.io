@@ -1,0 +1,26 @@
+package org.web.game.world;
+
+import java.util.ArrayList;
+
+import org.web.Console;
+import org.web.Start;
+import org.web.client.Client;
+import org.web.client.message.SocketSender;
+import org.web.entity.Bomb;
+import org.web.entity.Player;
+
+public class World {
+	
+	private static int nextplayerid = 0;
+
+	public static void loadWorld()
+	{
+		
+	}
+	
+	public static int getnextPlayerId()
+	{
+		return (nextplayerid++);
+	}
+
+}

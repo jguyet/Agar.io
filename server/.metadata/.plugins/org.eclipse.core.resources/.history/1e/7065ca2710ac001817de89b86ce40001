@@ -1,0 +1,115 @@
+package com.weoohh.agar.client;
+
+import java.net.Socket;
+
+import org.json.JSONObject;
+
+import com.weoohh.agar.Console;
+import com.weoohh.agar.Start;
+import com.weoohh.agar.Console.Color;
+import com.weoohh.agar.client.message.SocketSender;
+import com.weoohh.agar.entity.Player;
+import com.weoohh.agar.game.world.World;
+
+public class Client{
+	
+	public Socket								session;
+	public Aks									aks;
+	public Player								player;
+	
+	public int									screenWidth;
+	public int									screenHeight;
+
+	public Client(Socket session)
+	{
+		System.out.println("NEW CLIENT");
+		this.session = session;
+		this.player = new Player(World.getnextPlayerId(), 0, 0, 40, this);
+		this.aks = new Aks(this);
+	}
+	
+	public void connect(JSONObject json) {
+		
+		screenWidth = json.getInt("width");
+		screenHeight = json.getInt("height");
+		
+		JSONObject message = new JSONObject();//set user informations
+		
+		message
+			.put("messageId", 998)
+			.put("id", player.getId())
+			.put("x", this.player.getx() - (this.screenWidth / 2))
+			.put("y", this.player.gety() - (this.screenHeight / 2))
+			.put("width", 6000)
+			.put("height", 6000);
+		
+		SocketSender.sendMessage(this, message.toString());
+		
+		message = new JSONObject();//add currentPlayer
+		
+		message
+			.put("messageId", 1000)
+			.put("id", player.getId())
+			.put("x", this.player.getx())
+			.put("y", this.player.gety())
+			.put("r", this.player.getSize());
+		SocketSender.sendMessage(this, message.toString());
+		
+		
+		message = new JSONObject();//add Entity
+		
+		message
+			.put("messageId", 1001)
+			.put("id", player.getId())
+			.put("x", this.player.getx())
+			.put("y", this.player.gety())
+			.put("r", this.player.getSize());
+		SocketSender.sendMessageToAll(message.toString());
+	}
+	
+	public void update(JSONObject json) {
+		this.player.setx(json.getDouble("x"));
+		this.player.sety(json.getDouble("y"));
+		
+		JSONObject message = new JSONObject();//set user informations
+		
+		message
+			.put("messageId", 1002)
+			.put("id", player.getId())
+			.put("x", this.player.getx())
+			.put("y", this.player.gety())
+			.put("r", this.player.getSize());
+		SocketSender.sendMessage(this, message.toString());
+	}
+	
+	
+	public void kick()
+	{
+		try
+		{
+			
+			// send to all remove message -->
+	    	JSONObject message = new JSONObject();
+			
+			message
+				.put("messageId", 1001)
+				.put("entityId", player.getId());
+			
+			SocketSender.sendMessageToAll(message.toString());
+			//<-- end
+			
+			Start.webServer.removeClient(this);
+			if(!session.isClosed())
+			{
+	    		session.close();
+			}
+	    	this.aks.closeDescriptors();
+	    	
+	    	Console.println("Client disconnected ", Color.BLACK);
+		}
+		catch (Exception e1)
+		{
+			e1.printStackTrace();
+		}
+	}
+}
